@@ -1055,5 +1055,53 @@ SELECT
 UPDATE ProduitFacture SET quantite = quantite + 10 WHERE id_facture = 1 AND id_produit = 39;
 
 
+SELECT * FROM Patient;
+
+SELECT * FROM Medecin;
+
+SELECT * FROM Examen;
 
 
+
+
+INSERT INTO PatientExamen(id_medecin, id_examen, id_patient, commentaire) VALUES (1, 1, 20, 'Si vous souhaitez installer Git sur Linux via un programme d’installation binaire, vous pouvez
+généralement le faire via l’outil de gestion de paquetage de base fourni avec votre distribution. Si
+vous êtes sur Fedora, vous pouvez utiliser yum:'),(8, 1, 10, 'Si vous souhaitez installer Git sur Linux via un programme d’installation binaire, vous pouvez
+généralement le faire via l’outil de gestion de paquetage de base fourni avec votre distribution. Si
+vous êtes sur Fedora, vous pouvez utiliser yum:'),(14, 1, 25, 'Si vous souhaitez installer Git sur Linux via un programme d’installation binaire, vous pouvez
+généralement le faire via l’outil de gestion de paquetage de base fourni avec votre distribution. Si
+vous êtes sur Fedora, vous pouvez utiliser yum:');
+
+
+INSERT INTO PatientExamen(id_medecin, id_examen, id_patient, commentaire) VALUES(15, 2, 14, 'Pour récupérer le contenu d''un tableau, vous utilisez typiquement l''opérateur')
+
+
+
+SELECT * FROM PatientExamen;
+
+
+SELECT * FROM Medecin
+	WHERE id_medecin IN(SELECT id_medecin FROM PatientExamen WHERE id_examen = 1);
+
+
+SELECT * FROM Examen WHERE id_examen = (SELECT id_examen FROM PatientExamen WHERE id_medecin=1);
+	
+SELECT * FROM Medecin
+	WHERE id_medecin = (SELECT id_examen FROM PatientExamen WHERE id_medecin = 1);
+	
+
+SELECT 
+	id_medecin FROM
+	PatientExamen
+	WHERE id_examen = (SELECT id_examen FROM PatientExamen WHERE id_medecin = 1);
+	
+	
+	
+SELECT 
+	id_medecin, nom,postnom,prenom,sexe date_naissance, gradeMedecin.designation GRADE 
+	FROM Medecin
+	JOIN GradeMedecin USING(id_grade)
+	JOIN PatientExamen USING(id_medecin)
+	WHERE id_examen = (SELECT id_examen FROM PatientExamen WHERE id_medecin = 1);
+	
+SELECT * FROM Medecin;
