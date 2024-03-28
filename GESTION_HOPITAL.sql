@@ -1289,6 +1289,8 @@ SELECT * FROM Produits
 SELECT * FROM Maladie;
 
 INSERT INTO Maladie(designation, prix, date_creation) VALUES('DIABETE', 3500, '2024-03-26');
+INSERT INTO Maladie(designation, prix, date_creation) VALUES('KIST', 1000000, '2024-03-25');
+INSERT INTO Maladie(designation, prix, date_creation) VALUES('KIST FEMME', 1000000, '2024-03-24');
 INSERT INTO Maladie(designation, prix) VALUES('FOLIE', 8500);
 
 SELECT MIN(prix) FROM Maladie;
@@ -1327,12 +1329,23 @@ SELECT
 	date_creation::DATE AS DATE_JOURS,
 	SUM(prix) AS SOUS_TOTAL,
 	CASE
-		WHEN LAG(SUM(prix), 1, 0::MONEY) OVER (ORDER BY SUM(prix)) < SUM(prix) THEN 'LA PRECEDENTE SOMME INF'
-		WHEN LAG(SUM(prix), 1, 0::MONEY) OVER (ORDER BY SUM(prix)) > SUM(prix) THEN 'LA PRECEDENTE SOMME SUP'
-		ELSE 'MEME' END AS TEST_CONDITION
+		WHEN SUM(prix) < LAG(SUM(prix)) OVER (ORDER BY date_creation)  THEN CONCAT('LA PRECEDENTE SOMME SUP AVEC : ',  CAST(LAG(SUM(prix)) OVER (ORDER BY date_creation) - SUM(prix) AS TEXT))
+		WHEN  SUM(prix) > LAG(SUM(prix)) OVER (ORDER BY date_creation)  THEN CONCAT('LE CA DE CE JOUR SUP  AU PRECEDENT AVEC : ', CAST( SUM(prix) - LAG(SUM(prix)) OVER (ORDER BY date_creation) AS TEXT))
+		WHEN  SUM(prix) = LAG(SUM(prix)) OVER (ORDER BY date_creation)  THEN CONCAT('CA DU JOUR EGAL AU CA PRECEDENT ET L''ECART EST DE : ', CAST( SUM(prix) - LAG(SUM(prix)) OVER (ORDER BY date_creation) AS TEXT))
+		ELSE 0::TEXT END AS COMPARAISON_DU_CHIFFREMENT_D_AFFAIRE_PAR_JOUR
 	FROM Maladie
-	GROUP BY date_creation;
+	GROUP BY date_creation ORDER BY date_creation ASC;
+	
+	
+SELECT * FROM MaladieTraite;
+	
 
+SELECT * FROM Examen;
+
+SELECT * FROM Examen;
+
+
+SELECT * FROM PatientExamen;
 
 
 
