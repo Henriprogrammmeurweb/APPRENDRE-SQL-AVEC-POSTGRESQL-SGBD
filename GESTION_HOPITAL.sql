@@ -1288,6 +1288,7 @@ SELECT * FROM Produits
 
 SELECT * FROM Maladie;
 
+INSERT INTO Maladie(designation, prix, date_creation) VALUES('DIABETE', 3500, '2024-03-26');
 INSERT INTO Maladie(designation, prix) VALUES('FOLIE', 8500);
 
 SELECT MIN(prix) FROM Maladie;
@@ -1296,6 +1297,42 @@ SELECT MAX(prix) FROM Maladie;
 SELECT * FROM Maladie WHERE prix = (SELECT prix FROM Maladie WHERE id_maladie=4);
 SELECT * FROM Maladie WHERE prix < (SELECT prix FROM Maladie WHERE id_maladie=4);
 SELECT * FROM Maladie WHERE prix > (SELECT prix FROM Maladie WHERE id_maladie=4) AND designation LIKE 'L%';
+
+
+SELECT * FROM Maladie;
+
+SELECT
+	id_maladie,
+	Maladie.designation  AS MALADIE,
+	SUM(prix) OVER(PARTITION BY date_creation ORDER BY date_creation DESC) AS PARTITIONNEMENT
+	FROM Maladie;
+
+SELECT 
+	date_creation::DATE AS DATE_JOURS,
+	SUM(prix) AS SOUS_TOTAL
+	FROM Maladie
+	GROUP BY ROLLUP(date_creation)
+	ORDER BY date_creation ASC;
+
+
+SELECT 
+	date_creation::DATE AS DATE_JOURS,
+	SUM(prix) AS SOUS_TOTAL,
+	LAG(SUM(prix), 1, 0::MONEY) OVER (ORDER BY SUM(prix)) AS COMPARAISON
+	FROM Maladie
+	GROUP BY date_creation;
+	
+
+SELECT 
+	date_creation::DATE AS DATE_JOURS,
+	SUM(prix) AS SOUS_TOTAL,
+	CASE
+		WHEN LAG(SUM(prix), 1, 0::MONEY) OVER (ORDER BY SUM(prix)) < SUM(prix) THEN 'LA PRECEDENTE SOMME INF'
+		WHEN LAG(SUM(prix), 1, 0::MONEY) OVER (ORDER BY SUM(prix)) > SUM(prix) THEN 'LA PRECEDENTE SOMME SUP'
+		ELSE 'MEME' END AS TEST_CONDITION
+	FROM Maladie
+	GROUP BY date_creation;
+
 
 
 
