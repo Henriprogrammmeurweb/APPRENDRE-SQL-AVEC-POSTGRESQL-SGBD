@@ -159,6 +159,7 @@ START TRANSACTION;
 	
 	ALTER TABLE PatientExamen ADD COLUMN commentaire TEXT NOT NULL;
 	
+	ALTER TABLE MaladieTraite ADD COLUMN nombre_fois INT NOT NULL CHECK (nombre_fois >= 1);
 	
 COMMIT;
 
@@ -1105,3 +1106,181 @@ SELECT
 	WHERE id_examen = (SELECT id_examen FROM PatientExamen WHERE id_medecin = 1);
 	
 SELECT * FROM Medecin;
+
+SELECT * FROM Maladie;
+
+INSERT INTO Maladie(designation, prix) VALUES('TURCULOSE', 50000), ('LEPRE', '36000'),('MALARIA', 3000),
+('OPERATION', 8500), ('PERFUSION', 30000);
+
+SELECT * FROM MaladieTraite;
+
+INSERT INTO MaladieTraite(id_patient, id_maladie, nombre_fois) VALUES(10, 2, 1);
+
+INSERT INTO MaladieTraite(id_patient, id_maladie, nombre_fois) VALUES(12, 5, 3),(13,2,1);
+INSERT INTO MaladieTraite(id_patient, id_maladie, nombre_fois) VALUES(14, 5, 3),(17,2,1);
+INSERT INTO MaladieTraite(id_patient, id_maladie, nombre_fois) VALUES(2, 1, 1),(5,2,2);
+INSERT INTO MaladieTraite(id_patient, id_maladie, nombre_fois) VALUES(1, 1, 2),(8,4,1);
+
+
+SELECT * FROM Patient;
+SELECT * FROM Maladie;
+SELECT * FROM MaladieTraite;
+
+
+
+
+START TRANSACTION;
+
+UPDATE MaladieTraite SET nombre_fois=nombre_fois + 2 WHERE id_patient = 2 AND id_maladie = 1;
+SAVEPOINT save_point_1;
+
+UPDATE MaladieTraite SET nombre_fois=nombre_fois + 8 WHERE id_patient = 13 AND id_maladie = 2;
+SAVEPOINT save_point_2;
+
+ROLLBACK TO save_point_1;
+
+UPDATE MaladieTraite SET nombre_fois=nombre_fois + 3 WHERE id_patient = 10 AND id_maladie = 2;
+SAVEPOINT save_point_2;
+
+COMMIT;
+
+
+SELECT
+	patient.id_patient AS ID_PATIENT,
+	patient.nom AS NOM,
+	patient.postnom AS POSTNOM,
+	patient.prenom AS PRENOM,
+	patient.sexe AS SEXE,
+	patient.age AS AGE
+	FROM Patient
+	JOIN MaladieTraite USING(id_patient)
+	WHERE id_maladie = (SELECT id_maladie FROM MaladieTraite WHERE id_patient=5) AND patient.age  BETWEEN 20 AND 25;
+
+
+
+SELECT
+	patient.id_patient AS ID_PATIENT,
+	patient.nom AS NOM,
+	patient.postnom AS POSTNOM,
+	patient.prenom AS PRENOM,
+	patient.sexe AS SEXE,
+	patient.age AS AGE,
+	maladie.prix * MaladieTraite.nombre_fois AS MONTANT_A_PAYS
+	FROM Patient
+	JOIN MaladieTraite USING(id_patient)
+	JOIN Maladie USING(id_maladie)
+	WHERE id_maladie = (SELECT id_maladie FROM MaladieTraite WHERE id_patient=1) AND patient.age  BETWEEN 20 AND 25;
+	
+	
+SELECT * FROM Produits;	
+SELECT * FROM Patient;	
+
+
+SELECT * FROM Salle;
+
+
+
+SELECT 
+	Patient.id_patient AS ID_PATIENT,
+	Patient.nom AS NOM,
+	Patient.postnom AS POSTNOM,
+	Patient.prenom AS PRENOM,
+	Patient.sexe AS SEXE,
+	Patient.age AS AGE,
+	Salle.designation AS SALLE
+	FROM Patient
+	JOIN Salle USING(id_salle)
+	WHERE id_salle = (SELECT id_salle FROM Patient WHERE id_patient=1);
+	
+	
+	
+37000 CAT 4
+	
+SELECT * FROM Produits;
+
+SELECT 
+	CategoryProduit.id_category AS ID_CATEGORY,
+	CategoryProduit.designation AS CATEGORY,
+	COUNT(Produits.id_produit) AS NOMBRE_PRODUIT,
+	SUM(Produits.sous_total) AS SOUS_TOTAL
+	FROM Produits
+	JOIN CategoryProduit USING(id_category)
+	GROUP BY CategoryProduit.id_category, CATEGORY;
+	
+
+SELECT *
+	FROM Produits
+	WHERE id_category = (SELECT id_category FROM Produits 
+						 GROUP BY id_category 
+						 HAVING SUM(sous_total::DECIMAL) < (SELECT sous_total::DECIMAL 
+															 		FROM Produits 
+															 		WHERE id_produit=30));
+																	
+SELECT * FROM Medecin;
+
+SELECT 
+	Medecin.id_medecin AS ID_MED,
+	GradeMedecin.id_grade AS ID_GRADE,
+	Medecin.nom AS NOM,
+	Medecin.postnom AS POSTNOM,
+	Medecin.prenom AS PRENOM,
+	Medecin.sexe AS SEXE,
+	GradeMedecin.designation AS GRADE,
+	Medecin.date_naissance AS DATE_NAISS
+	FROM Medecin
+	JOIN GradeMedecin USING(id_grade)
+	WHERE id_grade = (SELECT id_grade FROM Medecin WHERE id_medecin=3)
+	AND Medecin.date_naissance IS NOT NULL AND Medecin.date_naissance BETWEEN '2000-01-01' AND '2006-01-01';
+
+
+
+																	
+UPDATE Medecin SET date_naissance = '1999-01-25' WHERE id_medecin=4 RETURNING *;																	
+UPDATE Medecin SET date_naissance = '2000-05-07' WHERE id_medecin=10 RETURNING *;																	
+UPDATE Medecin SET date_naissance = '2005-10-14' WHERE id_medecin=7 RETURNING *;																	
+	
+SELECT *
+	FROM GradeMedecin;
+																	
+
+SELECT 
+	GradeMedecin.designation AS GRADE,
+	COUNT(Medecin.id_medecin) AS NOMBRE_MEDECIN
+	FROM GradeMedecin
+	LEFT JOIN Medecin USING(id_grade)
+	GROUP BY GRADE;
+	
+	
+SELECT * FROM Produits;	
+
+
+SELECT * FROM Produits
+	WHERE prix_unitaire = (SELECT MIN(prix_unitaire) FROM Produits);
+
+
+SELECT * FROM Produits
+	WHERE prix_unitaire = (SELECT MAX(prix_unitaire) FROM Produits);
+	
+	
+SELECT * FROM Produits
+	WHERE quantite = (SELECT MIN(quantite) FROM Produits);
+
+
+SELECT * FROM Produits
+	WHERE quantite = (SELECT MAX(quantite) FROM Produits);
+
+SELECT * FROM Produits
+	WHERE quantite <= ALL(SELECT quantite FROM Produits);
+
+SELECT * FROM Produits
+	WHERE quantite >= ALL(SELECT quantite FROM Produits);
+	
+
+SELECT * FROM Produits;
+
+INSERT INTO Produits(id_category, id_fournisseur, id_annee, designation, quantite, prix_unitaire) VALUES(7, 10, 20, 'DEXAMETHASONE', 400, 750);
+
+SELECT * FROM Produits WHERE (quantite, prix_unitaire) = (SELECT quantite, prix_unitaire FROM Produits WHERE id_produit=28);
+
+SELECT * FROM Produits 
+	WHERE quantite > (SELECT quantite FROM Produits WHERE id_produit=32) AND prix_unitaire > (SELECT prix_unitaire FROM Produits WHERE id_produit=32);
