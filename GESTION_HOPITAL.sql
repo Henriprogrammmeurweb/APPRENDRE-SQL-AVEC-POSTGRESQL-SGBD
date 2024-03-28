@@ -1284,3 +1284,19 @@ SELECT * FROM Produits WHERE (quantite, prix_unitaire) = (SELECT quantite, prix_
 
 SELECT * FROM Produits 
 	WHERE quantite > (SELECT quantite FROM Produits WHERE id_produit=32) AND prix_unitaire > (SELECT prix_unitaire FROM Produits WHERE id_produit=32);
+
+
+SELECT * FROM Maladie;
+
+INSERT INTO Maladie(designation, prix) VALUES('FOLIE', 8500);
+
+SELECT MIN(prix) FROM Maladie;
+SELECT MAX(prix) FROM Maladie;
+
+SELECT * FROM Maladie WHERE prix = (SELECT prix FROM Maladie WHERE id_maladie=4);
+SELECT * FROM Maladie WHERE prix < (SELECT prix FROM Maladie WHERE id_maladie=4);
+SELECT * FROM Maladie WHERE prix > (SELECT prix FROM Maladie WHERE id_maladie=4) AND designation LIKE 'L%';
+
+
+
+
