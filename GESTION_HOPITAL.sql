@@ -152,7 +152,6 @@ START TRANSACTION;
 		CONSTRAINT fk_examen FOREIGN KEY(id_examen) REFERENCES Examen(id_examen)
 	);
 	
-	SELECT * FROM ProduitFacture;
 	
 	ALTER TABLE ProduitFacture ADD COLUMN quantite INT NOT NULL;
 	ALTER TABLE ProduitFacture ADD CONSTRAINT fk_check_quantity CHECK(quantite >= 1);
@@ -1192,9 +1191,7 @@ SELECT
 	JOIN Salle USING(id_salle)
 	WHERE id_salle = (SELECT id_salle FROM Patient WHERE id_patient=1);
 	
-	
-	
-37000 CAT 4
+
 	
 SELECT * FROM Produits;
 
@@ -1347,6 +1344,124 @@ SELECT * FROM Examen;
 
 SELECT * FROM PatientExamen;
 
+SELECT * FROM Medecin;
 
+START TRANSACTION;
+
+	INSERT INTO Medecin(id_grade, nom, postnom, prenom,sexe, date_naissance) VALUES(2, 'KASONGO', 'KITENGIE', 'PATRICK', 'M', '1981-01-25');
+	INSERT INTO Medecin(id_grade, nom, postnom, prenom,sexe, date_naissance) VALUES(2, 'KASONGO', 'KITENGIE', 'PATRICK', 'G', '1392-01-27');
+	
+	
+COMMIT;
+
+ROLLBACK;
+
+SELECT * FROM Examen;
+SELECT * FROM CategoryExamen;
+
+
+SELECT 
+	CategoryExamen.designation AS CATEGORY,
+	Examen.prix::DECIMAL AS PRIX
+	FROM Examen
+	JOIN CategoryExamen USING(id_categoryexamen);
+	
+	
+----------------------------------------Utilisation de WITH-------------------------------------------------	
+
+
+SELECT * FROM FournisseurProduit;
+
+
+SELECT 
+	FournisseurProduit.id_fournisseur AS ID_FOURNISSEURS,
+	FournisseurProduit.designation AS FOURNISSEURS,
+	COUNT(Produits.id_produit) AS NOMBRE_PRODUITS
+	FROM FournisseurProduit
+	JOIN Produits USING(id_fournisseur)
+	GROUP BY ID_FOURNISSEURS,FOURNISSEURS
+	ORDER BY NOMBRE_PRODUITS DESC;
+
+WITH All_product AS (
+	SELECT id_fournisseur, 
+	COUNT(Produits.id_produit) AS NOMBRE_PRODUITS
+	FROM Produits GROUP BY id_fournisseur), Meilleurs_Fournisseur AS(
+	SELECT 
+		id_fournisseur FROM All_product 
+		WHERE NOMBRE_PRODUITS = (SELECT MAX(NOMBRE_PRODUITS) FROM All_product)
+) SELECT 
+	FournisseurProduit.designation AS FOURNISSEURS, 
+	COUNT(Produits.id_produit) AS NOMBRE_PRODUITS 
+	FROM Produits 
+	JOIN FournisseurProduit USING(id_fournisseur)
+	WHERE id_fournisseur IN(SELECT id_fournisseur FROM Meilleurs_Fournisseur)
+	GROUP BY FOURNISSEURS;
+	
+	
+SELECT * FROM Produits;	
+SELECT * FROM CategoryProduit;	
+
+
+WITH All_produit AS (
+	SELECT
+		Produits.id_category AS ID_CATEGORY,
+		COUNT(Produits.id_produit) AS NOMBRE_PRODUITS 
+		FROM Produits 
+		GROUP BY ID_CATEGORY
+	), Meilleur_Category AS (SELECT ID_CATEGORY 
+							 FROM All_produit 
+							 WHERE NOMBRE_PRODUITS  = (SELECT MAX(NOMBRE_PRODUITS ) FROM All_produit )
+							) SELECT
+								CategoryProduit.designation AS CATEGORY,
+								COUNT(Produits.id_produit) AS NOMBRE_PRODUITS 
+								FROM CategoryProduit 
+								JOIN Produits USING(id_category)
+								WHERE id_category IN(SELECT id_category FROM Meilleur_Category)
+								GROUP BY CATEGORY;
+
+
+
+SELECT
+	CategoryProduit.designation AS CATEGORY,
+	COUNT(Produits.id_produit) AS NOMBRE_PRODUITS 
+	FROM CategoryProduit 
+	JOIN Produits USING(id_category)
+	GROUP BY CATEGORY 
+	ORDER BY NOMBRE_PRODUITS  DESC;
+	
+	
+SELECT
+	Patient.nom AS NOM,
+	Patient.postnom AS POSTNOM,
+	Patient.prenom AS PRENOM,
+	Patient.sexe AS SEXE,
+	Patient.age AS AGE,
+	Salle.designation AS SALLE,
+	COUNT(PatientExamen.id_patient) AS NOMBRE_EXAMEN
+	FROM Patient
+	LEFT JOIN PatientExamen USING(id_patient)
+	JOIN Salle USING(id_salle)
+	GROUP BY NOM,POSTNOM,PRENOM,SEXE,AGE, SALLE;
+	
+
+SELECT * FROM PatientExamen;
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
+	
 
 
