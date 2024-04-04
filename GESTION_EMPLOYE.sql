@@ -824,7 +824,16 @@ CREATE OR REPLACE VIEW Liste_Personnel AS
 	
 	
 SELECT * FROM Liste_Personnel;
-	
+
+SELECT * FROM Employe WHERE id_employe=90 OR id_employe = 10 OR id_employe = 50 OR id_employe = 80;
+
+EXPLAIN SELECT * FROM Employe WHERE id_grade = 11;
+
+CREATE INDEX index_seach_id_employe ON Employe(id_employe);
+CREATE INDEX index_search_id_grade_on_Employe ON Employe(id_grade);
+
+
+
 	
 
 
